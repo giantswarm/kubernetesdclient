@@ -1,7 +1,6 @@
 package root
 
 import (
-	"fmt"
 	"net/url"
 
 	"github.com/go-resty/resty"
@@ -63,14 +62,12 @@ func (s *Service) Get() (*Response, error) {
 		return nil, maskAny(err)
 	}
 
-	var response *Response
-	r, err := s.RestClient.R().SetResult(response).Get(u.String())
+	r, err := s.RestClient.R().SetResult(&Response{}).Get(u.String())
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	fmt.Printf("r: %#v\n", r)
-	fmt.Printf("response: %#v\n", response)
+	response := r.Result().(*Response)
 
 	return response, nil
 }

@@ -1,7 +1,6 @@
 package creator
 
 import (
-	"fmt"
 	"net/url"
 
 	"github.com/go-resty/resty"
@@ -81,14 +80,12 @@ func (s *Service) Create(createConfig CreateConfig) (*Response, error) {
 		return nil, maskAny(err)
 	}
 
-	var response *Response
-	r, err := s.RestClient.R().SetBody(createConfig).SetResult(response).Post(u.String())
+	r, err := s.RestClient.R().SetBody(createConfig).SetResult(&Response{}).Post(u.String())
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	fmt.Printf("r: %#v\n", r)
-	fmt.Printf("response: %#v\n", response)
+	response := r.Result().(*Response)
 
 	return response, nil
 }
