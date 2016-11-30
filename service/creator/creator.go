@@ -4,12 +4,10 @@ import (
 	"net/url"
 
 	"github.com/go-resty/resty"
-
-	"github.com/giantswarm/kubernetesdclient/service/creator/config"
 )
 
 const (
-	Endpoint = "/v1/clusters"
+	Endpoint = "/v1/clusters/"
 )
 
 // Config represents the configuration used to create a creator service.
@@ -30,22 +28,6 @@ func DefaultConfig() Config {
 
 		// Settings.
 		URL: nil,
-	}
-
-	return newConfig
-}
-
-type CreateConfig struct {
-	Cluster  *config.Cluster
-	Customer *config.Customer
-}
-
-// DefaultCreateConfig provides a default configuration to create a new cluster
-// resource by best effort.
-func DefaultCreateConfig() CreateConfig {
-	newConfig := CreateConfig{
-		Cluster:  config.NewCluster(),
-		Customer: config.NewCustomer(),
 	}
 
 	return newConfig
@@ -74,13 +56,13 @@ type Service struct {
 	Config
 }
 
-func (s *Service) Create(createConfig CreateConfig) (*Response, error) {
+func (s *Service) Create(request Request) (*Response, error) {
 	u, err := s.URL.Parse(Endpoint)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	r, err := s.RestClient.R().SetBody(createConfig).SetResult(&Response{}).Post(u.String())
+	r, err := s.RestClient.R().SetBody(request).SetResult(&Response{}).Post(u.String())
 	if err != nil {
 		return nil, maskAny(err)
 	}
