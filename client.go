@@ -36,6 +36,16 @@ func DefaultConfig() Config {
 
 // New creates a new configured client object.
 func New(config Config) (*Client, error) {
+	// Dependencies.
+	if config.RestClient == nil {
+		return nil, maskAnyf(invalidConfigError, "rest client must not be empty")
+	}
+
+	// Settings.
+	if config.Address == "" {
+		return nil, maskAnyf(invalidConfigError, "address must not be empty")
+	}
+
 	u, err := url.Parse(config.Address)
 	if err != nil {
 		return nil, maskAny(err)
