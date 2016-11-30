@@ -1,4 +1,4 @@
-package creator
+package deleter
 
 import (
 	"fmt"

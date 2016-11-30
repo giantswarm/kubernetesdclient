@@ -8,6 +8,7 @@ import (
 	"github.com/go-resty/resty"
 
 	"github.com/giantswarm/kubernetesdclient/service/creator"
+	"github.com/giantswarm/kubernetesdclient/service/deleter"
 	"github.com/giantswarm/kubernetesdclient/service/root"
 )
 
@@ -59,6 +60,14 @@ func New(config Config) (*Client, error) {
 		return nil, maskAny(err)
 	}
 
+	deleterConfig := deleter.DefaultConfig()
+	deleterConfig.RestClient = config.RestClient
+	deleterConfig.URL = u
+	newDeleterService, err := deleter.New(deleterConfig)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
 	rootConfig := root.DefaultConfig()
 	rootConfig.RestClient = config.RestClient
 	rootConfig.URL = u
@@ -69,6 +78,7 @@ func New(config Config) (*Client, error) {
 
 	newClient := &Client{
 		Creator: newCreatorService,
+		Deleter: newDeleterService,
 		Root:    newRootService,
 	}
 
@@ -77,5 +87,6 @@ func New(config Config) (*Client, error) {
 
 type Client struct {
 	Creator *creator.Service
+	Deleter *deleter.Service
 	Root    *root.Service
 }

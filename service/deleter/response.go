@@ -1,4 +1,4 @@
-package creator
+package deleter
 
 type Response struct {
 }
