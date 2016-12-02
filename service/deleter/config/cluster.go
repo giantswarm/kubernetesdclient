@@ -4,7 +4,7 @@ type Cluster struct {
 	ID string `json:"id"`
 }
 
-func NewCluster() *Cluster {
+func DefaultCluster() *Cluster {
 	return &Cluster{
 		ID: "",
 	}

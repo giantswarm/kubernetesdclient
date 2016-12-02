@@ -2,6 +2,7 @@ package creator
 
 import "github.com/giantswarm/kubernetesdclient/service/creator/config"
 
+// Request is the configuration for the service action.
 type Request struct {
 	Cluster  *config.Cluster  `json:"cluster"`
 	Customer *config.Customer `json:"customer"`
@@ -10,7 +11,7 @@ type Request struct {
 // DefaultRequest provides a default request by best effort.
 func DefaultRequest() Request {
 	return Request{
-		Cluster:  config.NewCluster(),
-		Customer: config.NewCustomer(),
+		Cluster:  config.DefaultCluster(),
+		Customer: config.DefaultCustomer(),
 	}
 }

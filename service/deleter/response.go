@@ -1,5 +1,6 @@
 package deleter
 
+// Response is the return value of the service action.
 type Response struct {
 }
 
