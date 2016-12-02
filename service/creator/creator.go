@@ -63,7 +63,7 @@ func (s *Service) Create(request Request) (*Response, error) {
 		return nil, maskAny(err)
 	}
 
-	r, err := s.RestClient.R().SetBody(request).SetResult(Response{}).Post(u.String())
+	r, err := s.RestClient.R().SetBody(request).SetResult(DefaultResponse()).Post(u.String())
 	if err != nil {
 		return nil, maskAny(err)
 	}
