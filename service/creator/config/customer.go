@@ -1,11 +1,11 @@
 package config
 
-func NewCustomer() *Customer {
+type Customer struct {
+	Name string
+}
+
+func DefaultCustomer() *Customer {
 	return &Customer{
 		Name: "",
 	}
-}
-
-type Customer struct {
-	Name string
 }

@@ -1,4 +1,4 @@
-package deleter
+package creator
 
 import (
 	"fmt"
@@ -8,10 +8,12 @@ import (
 )
 
 const (
+	// Endpoint is the API endpoint of the service this client action interacts
+	// with.
 	Endpoint = "/v1/clusters/"
 )
 
-// Config represents the configuration used to create a deleter service.
+// Config represents the configuration used to create a creator service.
 type Config struct {
 	// Dependencies.
 	RestClient *resty.Client
@@ -20,19 +22,21 @@ type Config struct {
 	URL *url.URL
 }
 
-// DefaultConfig provides a default configuration to create a new deleter
+// DefaultConfig provides a default configuration to create a new creator
 // service by best effort.
 func DefaultConfig() Config {
-	return Config{
+	newConfig := Config{
 		// Dependencies.
 		RestClient: resty.New(),
 
 		// Settings.
 		URL: nil,
 	}
+
+	return newConfig
 }
 
-// New creates a new configured deleter service.
+// New creates a new configured creator service.
 func New(config Config) (*Service, error) {
 	// Dependencies.
 	if config.RestClient == nil {
@@ -55,18 +59,18 @@ type Service struct {
 	Config
 }
 
-func (s *Service) Delete(request Request) (*Response, error) {
+func (s *Service) Create(request Request) (*Response, error) {
 	u, err := s.URL.Parse(Endpoint)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	r, err := s.RestClient.R().SetBody(request).SetResult(DefaultResponse()).Delete(u.String())
+	r, err := s.RestClient.R().SetBody(request).SetResult(DefaultResponse()).Post(u.String())
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	if r.StatusCode() != 202 {
+	if r.StatusCode() != 201 {
 		return nil, maskAny(fmt.Errorf(string(r.Body())))
 	}
 

@@ -1,11 +1,11 @@
 package config
 
-func NewCluster() *Cluster {
+type Cluster struct {
+	ID string
+}
+
+func DefaultCluster() *Cluster {
 	return &Cluster{
 		ID: "",
 	}
-}
-
-type Cluster struct {
-	ID string
 }
