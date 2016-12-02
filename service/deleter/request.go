@@ -6,7 +6,7 @@ type Request struct {
 	Cluster *config.Cluster `json:"cluster"`
 }
 
-// DefaultRequest provides a default  request by best effort.
+// DefaultRequest provides a default request by best effort.
 func DefaultRequest() Request {
 	return Request{
 		Cluster: config.NewCluster(),
