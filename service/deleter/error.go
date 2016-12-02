@@ -1,4 +1,4 @@
-package kubernetesdclient
+package deleter
 
 import (
 	"fmt"

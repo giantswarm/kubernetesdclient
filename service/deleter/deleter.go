@@ -1,4 +1,4 @@
-package creator
+package deleter
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ const (
 	Endpoint = "/v1/clusters/"
 )
 
-// Config represents the configuration used to create a creator service.
+// Config represents the configuration used to create a deleter service.
 type Config struct {
 	// Dependencies.
 	RestClient *resty.Client
@@ -20,34 +20,32 @@ type Config struct {
 	URL *url.URL
 }
 
-// DefaultConfig provides a default configuration to create a new creator
+// DefaultConfig provides a default configuration to create a new deleter
 // service by best effort.
 func DefaultConfig() Config {
-	newConfig := Config{
+	return Config{
 		// Dependencies.
 		RestClient: resty.New(),
 
 		// Settings.
 		URL: nil,
 	}
-
-	return newConfig
 }
 
-// New creates a new configured creator service.
+// New creates a new configured deleter service.
 func New(config Config) (*Service, error) {
-	newService := &Service{
-		Config: config,
-	}
-
 	// Dependencies.
-	if newService.RestClient == nil {
+	if config.RestClient == nil {
 		return nil, maskAnyf(invalidConfigError, "rest client must not be empty")
 	}
 
 	// Settings.
-	if newService.URL == nil {
+	if config.URL == nil {
 		return nil, maskAnyf(invalidConfigError, "URL must not be empty")
+	}
+
+	newService := &Service{
+		Config: config,
 	}
 
 	return newService, nil
@@ -57,18 +55,18 @@ type Service struct {
 	Config
 }
 
-func (s *Service) Create(request Request) (*Response, error) {
+func (s *Service) Delete(request Request) (*Response, error) {
 	u, err := s.URL.Parse(Endpoint)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	r, err := s.RestClient.R().SetBody(request).SetResult(DefaultResponse()).Post(u.String())
+	r, err := s.RestClient.R().SetBody(request).SetResult(DefaultResponse()).Delete(u.String())
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	if r.StatusCode() != 201 {
+	if r.StatusCode() != 202 {
 		return nil, maskAny(fmt.Errorf(string(r.Body())))
 	}
 
