@@ -1,17 +1,41 @@
 package creator
 
-import "github.com/giantswarm/kubernetesdclient/service/creator/config"
+import (
+	"time"
+
+	"github.com/giantswarm/kubernetesdclient/service/creator/request"
+)
 
 // Request is the configuration for the service action.
 type Request struct {
-	Cluster  *config.Cluster  `json:"cluster"`
-	Customer *config.Customer `json:"customer"`
+	APIEndpoint string    `json:"api_endpoint"`
+	CreateDate  time.Time `json:"create_date"`
+	ID          string    `json:"id"`
+	Name        string    `json:"name,omitempty"`
+
+	Owner string `json:"owner,omitempty"`
+
+	KubernetesVersion string `json:"kubernetes_version,omitempty"`
+
+	Masters []*request.Master `json:"masters,omitempty"`
+	Workers []*request.Worker `json:"workers,omitempty"`
 }
 
-// DefaultRequest provides a default request by best effort.
+// DefaultRequest provides a default request object by best effort.
 func DefaultRequest() Request {
 	return Request{
-		Cluster:  config.DefaultCluster(),
-		Customer: config.DefaultCustomer(),
+		Name: "",
+
+		Owner: "",
+
+		KubernetesVersion: "",
+
+		Masters: []*request.Master{
+			request.DefaultMaster(),
+		},
+		Workers: []*request.Worker{
+			request.DefaultWorker(),
+			request.DefaultWorker(),
+		},
 	}
 }
