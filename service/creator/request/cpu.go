@@ -6,8 +6,8 @@ type CPU struct {
 }
 
 // DefaultCPU provides a default CPU configuration by best effort.
-func DefaultCPU() *CPU {
-	return &CPU{
+func DefaultCPU() CPU {
+	return CPU{
 		Cores: 0,
 	}
 }

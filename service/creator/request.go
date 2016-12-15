@@ -17,8 +17,8 @@ type Request struct {
 
 	KubernetesVersion string `json:"kubernetes_version,omitempty"`
 
-	Masters []*request.Master `json:"masters,omitempty"`
-	Workers []*request.Worker `json:"workers,omitempty"`
+	Masters []request.Master `json:"masters,omitempty"`
+	Workers []request.Worker `json:"workers,omitempty"`
 }
 
 // DefaultRequest provides a default request object by best effort.
@@ -30,12 +30,7 @@ func DefaultRequest() Request {
 
 		KubernetesVersion: "",
 
-		Masters: []*request.Master{
-			request.DefaultMaster(),
-		},
-		Workers: []*request.Worker{
-			request.DefaultWorker(),
-			request.DefaultWorker(),
-		},
+		Masters: []request.Master{},
+		Workers: []request.Worker{},
 	}
 }

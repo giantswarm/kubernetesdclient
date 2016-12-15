@@ -6,8 +6,8 @@ type Memory struct {
 }
 
 // DefaultMemory provides a default ram configuration by best effort.
-func DefaultMemory() *Memory {
-	return &Memory{
+func DefaultMemory() Memory {
+	return Memory{
 		SizeGB: "",
 	}
 }
