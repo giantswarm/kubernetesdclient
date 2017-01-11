@@ -67,7 +67,7 @@ func (s *Service) Delete(request Request) (*Response, error) {
 	}
 
 	if r.StatusCode() != 202 {
-		return nil, maskAny(fmt.Errorf(string(r.Body())))
+		return nil, maskAnyf(executionFailedError, string(r.Body()))
 	}
 
 	response := r.Result().(*Response)

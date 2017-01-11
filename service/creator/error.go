@@ -22,6 +22,13 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 	return newErr
 }
 
+var executionFailedError = errgo.New("execution failed")
+
+// IsExecutionFailed asserts executionFailedError.
+func IsExecutionFailed(err error) bool {
+	return errgo.Cause(err) == executionFailedError
+}
+
 var invalidConfigError = errgo.New("invalid config")
 
 // IsInvalidConfig asserts invalidConfigError.
