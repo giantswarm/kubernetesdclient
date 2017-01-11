@@ -18,6 +18,7 @@ type Request struct {
 	KubernetesVersion string `json:"kubernetes_version,omitempty"`
 
 	Masters []request.Master `json:"masters,omitempty"`
+	Vault   request.Vault    `json:"vault,omitempty"`
 	Workers []request.Worker `json:"workers,omitempty"`
 }
 
@@ -31,6 +32,7 @@ func DefaultRequest() Request {
 		KubernetesVersion: "",
 
 		Masters: []request.Master{},
+		Vault:   request.DefaultVault(),
 		Workers: []request.Worker{},
 	}
 }
