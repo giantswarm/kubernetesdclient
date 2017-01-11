@@ -1,7 +1,6 @@
 package creator
 
 import (
-	"fmt"
 	"net/url"
 
 	"github.com/go-resty/resty"
@@ -71,7 +70,7 @@ func (s *Service) Create(request Request) (*Response, error) {
 	}
 
 	if r.StatusCode() != 201 {
-		return nil, maskAny(fmt.Errorf(string(r.Body())))
+		return nil, maskAnyf(executionFailedError, string(r.Body()))
 	}
 
 	response := r.Result().(*Response)
