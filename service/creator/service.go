@@ -4,6 +4,7 @@ import (
 	"net/url"
 
 	"github.com/go-resty/resty"
+	"golang.org/x/net/context"
 )
 
 const (
@@ -58,7 +59,7 @@ type Service struct {
 	Config
 }
 
-func (s *Service) Create(request Request) (*Response, error) {
+func (s *Service) Create(ctx context.Context, request Request) (*Response, error) {
 	u, err := s.URL.Parse(Endpoint)
 	if err != nil {
 		return nil, maskAny(err)
