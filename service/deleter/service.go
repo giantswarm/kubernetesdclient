@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"github.com/go-resty/resty"
+	"golang.org/x/net/context"
 )
 
 const (
@@ -55,7 +56,7 @@ type Service struct {
 	Config
 }
 
-func (s *Service) Delete(request Request) (*Response, error) {
+func (s *Service) Delete(ctx context.Context, request Request) (*Response, error) {
 	u, err := s.URL.Parse(fmt.Sprintf(Endpoint, request.Cluster.ID))
 	if err != nil {
 		return nil, maskAny(err)
