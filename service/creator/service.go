@@ -3,6 +3,7 @@ package creator
 import (
 	"net/url"
 
+	microerror "github.com/giantswarm/microkit/error"
 	"github.com/go-resty/resty"
 	"golang.org/x/net/context"
 )
@@ -40,12 +41,12 @@ func DefaultConfig() Config {
 func New(config Config) (*Service, error) {
 	// Dependencies.
 	if config.RestClient == nil {
-		return nil, maskAnyf(invalidConfigError, "rest client must not be empty")
+		return nil, microerror.MaskAnyf(invalidConfigError, "rest client must not be empty")
 	}
 
 	// Settings.
 	if config.URL == nil {
-		return nil, maskAnyf(invalidConfigError, "URL must not be empty")
+		return nil, microerror.MaskAnyf(invalidConfigError, "URL must not be empty")
 	}
 
 	newService := &Service{
@@ -62,16 +63,16 @@ type Service struct {
 func (s *Service) Create(ctx context.Context, request Request) (*Response, error) {
 	u, err := s.URL.Parse(Endpoint)
 	if err != nil {
-		return nil, maskAny(err)
+		return nil, microerror.MaskAny(err)
 	}
 
 	r, err := s.RestClient.R().SetBody(request).SetResult(DefaultResponse()).Post(u.String())
 	if err != nil {
-		return nil, maskAny(err)
+		return nil, microerror.MaskAny(err)
 	}
 
 	if r.StatusCode() != 201 {
-		return nil, maskAnyf(executionFailedError, string(r.Body()))
+		return nil, microerror.MaskAnyf(executionFailedError, string(r.Body()))
 	}
 
 	response := r.Result().(*Response)
