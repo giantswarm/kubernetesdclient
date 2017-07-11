@@ -10,6 +10,7 @@ import (
 	"github.com/giantswarm/kubernetesdclient/service/creator"
 	"github.com/giantswarm/kubernetesdclient/service/deleter"
 	"github.com/giantswarm/kubernetesdclient/service/root"
+	"github.com/giantswarm/kubernetesdclient/service/updater"
 )
 
 // Config represents the configuration used to create a new client object.
@@ -76,10 +77,19 @@ func New(config Config) (*Client, error) {
 		return nil, maskAny(err)
 	}
 
+	updaterConfig := updater.DefaultConfig()
+	updaterConfig.RestClient = config.RestClient
+	updaterConfig.URL = u
+	newUpdaterService, err := updater.New(updaterConfig)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
 	newClient := &Client{
 		Creator: newCreatorService,
 		Deleter: newDeleterService,
 		Root:    newRootService,
+		Updater: newUpdaterService,
 	}
 
 	return newClient, nil
@@ -89,4 +99,5 @@ type Client struct {
 	Creator *creator.Service
 	Deleter *deleter.Service
 	Root    *root.Service
+	Updater *updater.Service
 }

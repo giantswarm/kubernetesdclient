@@ -3,6 +3,7 @@ package root
 import (
 	"net/url"
 
+	microerror "github.com/giantswarm/microkit/error"
 	"github.com/go-resty/resty"
 	"golang.org/x/net/context"
 )
@@ -42,12 +43,12 @@ func New(config Config) (*Service, error) {
 
 	// Dependencies.
 	if newService.RestClient == nil {
-		return nil, maskAnyf(invalidConfigError, "rest client must not be empty")
+		return nil, microerror.MaskAnyf(invalidConfigError, "rest client must not be empty")
 	}
 
 	// Settings.
 	if newService.URL == nil {
-		return nil, maskAnyf(invalidConfigError, "URL must not be empty")
+		return nil, microerror.MaskAnyf(invalidConfigError, "URL must not be empty")
 	}
 
 	return newService, nil
@@ -60,12 +61,12 @@ type Service struct {
 func (s *Service) Get(ctx context.Context) (*Response, error) {
 	u, err := s.URL.Parse(Endpoint)
 	if err != nil {
-		return nil, maskAny(err)
+		return nil, microerror.MaskAny(err)
 	}
 
 	r, err := s.RestClient.R().SetResult(&Response{}).Get(u.String())
 	if err != nil {
-		return nil, maskAny(err)
+		return nil, microerror.MaskAny(err)
 	}
 
 	response := r.Result().(*Response)
