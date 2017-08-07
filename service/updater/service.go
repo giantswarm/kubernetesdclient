@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"net/url"
 
-	microerror "github.com/giantswarm/microkit/error"
-	micrologger "github.com/giantswarm/microkit/logger"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"github.com/go-resty/resty"
 	"golang.org/x/net/context"
 )
@@ -60,12 +60,12 @@ func DefaultConfig() Config {
 func New(config Config) (*Service, error) {
 	// Dependencies.
 	if config.RestClient == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "rest client must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "rest client must not be empty")
 	}
 
 	// Settings.
 	if config.URL == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "URL must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "URL must not be empty")
 	}
 
 	newService := &Service{
@@ -82,20 +82,20 @@ type Service struct {
 func (s *Service) Update(ctx context.Context, request Request) (*Response, error) {
 	u, err := s.URL.Parse(fmt.Sprintf(Endpoint, request.Cluster.ID))
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	s.Logger.Log("debug", fmt.Sprintf("sending PATCH request to %s", u.String()), "service", Name)
 	r, err := s.RestClient.R().SetBody(request).SetResult(DefaultResponse()).Patch(u.String())
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 	s.Logger.Log("debug", fmt.Sprintf("received status code %d", r.StatusCode()), "service", Name)
 
 	if r.StatusCode() == http.StatusNotFound {
-		return nil, microerror.MaskAny(notFoundError)
+		return nil, microerror.Mask(notFoundError)
 	} else if r.StatusCode() != http.StatusOK {
-		return nil, microerror.MaskAny(fmt.Errorf(string(r.Body())))
+		return nil, microerror.Mask(fmt.Errorf(string(r.Body())))
 	}
 
 	response := r.Result().(*Response)
