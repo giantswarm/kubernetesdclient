@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/kubernetesdclient/service/deleter"
 	"github.com/giantswarm/kubernetesdclient/service/root"
 	"github.com/giantswarm/kubernetesdclient/service/updater"
+	"github.com/giantswarm/microerror"
 )
 
 // Config represents the configuration used to create a new client object.
@@ -40,17 +41,17 @@ func DefaultConfig() Config {
 func New(config Config) (*Client, error) {
 	// Dependencies.
 	if config.RestClient == nil {
-		return nil, maskAnyf(invalidConfigError, "rest client must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "rest client must not be empty")
 	}
 
 	// Settings.
 	if config.Address == "" {
-		return nil, maskAnyf(invalidConfigError, "address must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "address must not be empty")
 	}
 
 	u, err := url.Parse(config.Address)
 	if err != nil {
-		return nil, maskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	creatorConfig := creator.DefaultConfig()
@@ -58,7 +59,7 @@ func New(config Config) (*Client, error) {
 	creatorConfig.URL = u
 	newCreatorService, err := creator.New(creatorConfig)
 	if err != nil {
-		return nil, maskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	deleterConfig := deleter.DefaultConfig()
@@ -66,7 +67,7 @@ func New(config Config) (*Client, error) {
 	deleterConfig.URL = u
 	newDeleterService, err := deleter.New(deleterConfig)
 	if err != nil {
-		return nil, maskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	rootConfig := root.DefaultConfig()
@@ -74,7 +75,7 @@ func New(config Config) (*Client, error) {
 	rootConfig.URL = u
 	newRootService, err := root.New(rootConfig)
 	if err != nil {
-		return nil, maskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	updaterConfig := updater.DefaultConfig()
@@ -82,7 +83,7 @@ func New(config Config) (*Client, error) {
 	updaterConfig.URL = u
 	newUpdaterService, err := updater.New(updaterConfig)
 	if err != nil {
-		return nil, maskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	newClient := &Client{
