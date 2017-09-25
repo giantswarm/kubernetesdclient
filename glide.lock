@@ -1,10 +1,10 @@
 hash: 9633766ccd1c0ca3721ed9fcd13c6a142b1a006c1294524443517b9699af149b
-updated: 2017-08-07T16:04:07.056942133+02:00
+updated: 2017-09-25T12:05:21.499209524+02:00
 imports:
 - name: github.com/giantswarm/microerror
   version: 5ade94eb4ee35ef72eb9382228470caeddb29989
 - name: github.com/giantswarm/microkit
-  version: 2d2b437193ccf7fc29e78d3654cfc6a305533001
+  version: 4871f763488a16c5b7ea3c411bbd82cd5139e29a
 - name: github.com/giantswarm/micrologger
   version: 8a69b2ab80ba2d0bd40d609206518fefacfc8fdf
 - name: github.com/go-kit/kit
@@ -22,7 +22,7 @@ imports:
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
 - name: golang.org/x/net
-  version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
+  version: 1c05540f6879653db88113bc4a2b70aec4bd491f
   subpackages:
   - context
   - publicsuffix
