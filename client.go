@@ -5,13 +5,13 @@ package kubernetesdclient
 import (
 	"net/url"
 
+	"github.com/giantswarm/microerror"
 	"github.com/go-resty/resty"
 
 	"github.com/giantswarm/kubernetesdclient/service/creator"
 	"github.com/giantswarm/kubernetesdclient/service/deleter"
 	"github.com/giantswarm/kubernetesdclient/service/root"
 	"github.com/giantswarm/kubernetesdclient/service/updater"
-	"github.com/giantswarm/microerror"
 )
 
 // Config represents the configuration used to create a new client object.
@@ -35,6 +35,13 @@ func DefaultConfig() Config {
 	}
 
 	return newConfig
+}
+
+type Client struct {
+	Creator *creator.Service
+	Deleter *deleter.Service
+	Root    *root.Service
+	Updater *updater.Service
 }
 
 // New creates a new configured client object.
@@ -94,11 +101,4 @@ func New(config Config) (*Client, error) {
 	}
 
 	return newClient, nil
-}
-
-type Client struct {
-	Creator *creator.Service
-	Deleter *deleter.Service
-	Root    *root.Service
-	Updater *updater.Service
 }
