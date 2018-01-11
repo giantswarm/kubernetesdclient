@@ -1,10 +1,16 @@
-hash: 8e7c6c00caaba165cb5b642279d3dd5c3978a3593b940b7042bbc3ec55393c64
-updated: 2017-12-18T17:29:19.345971+01:00
+hash: 6ee183dea85c291bd95a345a5c45b7589178c2d846ca5321549a3ce3e19e04bc
+updated: 2018-01-11T15:42:43.152819Z
 imports:
+- name: github.com/beorn7/perks
+  version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
+  subpackages:
+  - quantile
 - name: github.com/coreos/go-semver
   version: 8ab6407b697782a06568d4b7f1db25550ec2e4c6
   subpackages:
   - semver
+- name: github.com/giantswarm/microclient
+  version: c72c23ea633c34a5b19ed9e9efc02654ca2959e1
 - name: github.com/giantswarm/microerror
   version: ec5f66bb657662031c0d651504fee6908cdf28d9
 - name: github.com/giantswarm/micrologger
@@ -12,7 +18,7 @@ imports:
   subpackages:
   - loggermeta
 - name: github.com/giantswarm/versionbundle
-  version: e22eefeb8e97277bfebe225f77cf0528b69f36b8
+  version: 5d9ca79fd134acbe53e8b67ef1e649870f02d699
 - name: github.com/go-kit/kit
   version: a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b
   subpackages:
@@ -23,12 +29,38 @@ imports:
   version: 9ac9c42358f7c3c69ac9f8610e8790d7c338e85d
 - name: github.com/go-stack/stack
   version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
+- name: github.com/golang/protobuf
+  version: 1e59b77b52bf8e4b449a57e6f79f21226d571845
+  subpackages:
+  - proto
 - name: github.com/juju/errgo
   version: 08cceb5d0b5331634b9826762a8fd53b29b86ad8
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
+- name: github.com/matttproud/golang_protobuf_extensions
+  version: c12348ce28de40eed0136aa2b644d0ee0650e56c
+  subpackages:
+  - pbutil
+- name: github.com/prometheus/client_golang
+  version: 180b8fdc22b4ea7750bcb43c925277654a1ea2f3
+  subpackages:
+  - prometheus
+- name: github.com/prometheus/client_model
+  version: 99fa1f4be8e564e8a6b613da7fa6f46c9edafc6c
+  subpackages:
+  - go
+- name: github.com/prometheus/common
+  version: 89604d197083d4781071d3c65855d24ecfb0a563
+  subpackages:
+  - expfmt
+  - internal/bitbucket.org/ww/goautoneg
+  - model
+- name: github.com/prometheus/procfs
+  version: b15cd069a83443be3154b719d0cc9fe8117f09fb
+  subpackages:
+  - xfs
 - name: golang.org/x/net
-  version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
+  version: ab555f366c4508dbe0802550b1b20c46c5c18aa0
   subpackages:
   - context
   - publicsuffix

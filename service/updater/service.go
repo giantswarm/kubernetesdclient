@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/giantswarm/microclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/go-resty/resty"
@@ -86,7 +87,7 @@ func (s *Service) Update(ctx context.Context, request Request) (*Response, error
 	}
 
 	s.Logger.Log("debug", fmt.Sprintf("sending PATCH request to %s", u.String()), "service", Name)
-	r, err := s.RestClient.R().SetBody(request).SetResult(DefaultResponse()).Patch(u.String())
+	r, err := microclient.Do(ctx, s.RestClient.R().SetBody(request).SetResult(DefaultResponse()).Patch, u.String())
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

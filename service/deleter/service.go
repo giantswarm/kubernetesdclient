@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/giantswarm/microclient"
 	"github.com/giantswarm/microerror"
 	"github.com/go-resty/resty"
 	"golang.org/x/net/context"
@@ -63,7 +64,7 @@ func (s *Service) Delete(ctx context.Context, request Request) (*Response, error
 		return nil, microerror.Mask(err)
 	}
 
-	r, err := s.RestClient.R().SetBody(request).SetResult(DefaultResponse()).Delete(u.String())
+	r, err := microclient.Do(ctx, s.RestClient.R().SetBody(request).SetResult(DefaultResponse()).Delete, u.String())
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
