@@ -3,6 +3,7 @@ package root
 import (
 	"net/url"
 
+	"github.com/giantswarm/microclient"
 	"github.com/giantswarm/microerror"
 	"github.com/go-resty/resty"
 	"golang.org/x/net/context"
@@ -64,7 +65,7 @@ func (s *Service) Get(ctx context.Context) (*Response, error) {
 		return nil, microerror.Mask(err)
 	}
 
-	r, err := s.RestClient.R().SetResult(&Response{}).Get(u.String())
+	r, err := microclient.Do(ctx, s.RestClient.R().SetResult(&Response{}).Get, u.String())
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
