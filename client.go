@@ -4,6 +4,7 @@ package kubernetesdclient
 
 import (
 	"net/url"
+	"time"
 
 	"github.com/giantswarm/microerror"
 	"github.com/go-resty/resty"
@@ -12,6 +13,14 @@ import (
 	"github.com/giantswarm/kubernetesdclient/service/deleter"
 	"github.com/giantswarm/kubernetesdclient/service/root"
 	"github.com/giantswarm/kubernetesdclient/service/updater"
+)
+
+const (
+	// DefaultRetryCount is the default number of times to retry a failed network call.
+	DefaultRetryCount = 5
+
+	// DefaultTimeout is the default timeout for network calls.
+	DefaultTimeout = 5 * time.Second
 )
 
 // Config represents the configuration used to create a new client object.
@@ -26,9 +35,13 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new client object
 // by best effort.
 func DefaultConfig() Config {
+	newRestyClient := resty.New().
+		SetTimeout(DefaultTimeout).
+		SetRetryCount(DefaultRetryCount)
+
 	newConfig := Config{
 		// Dependencies.
-		RestClient: resty.New(),
+		RestClient: newRestyClient,
 
 		// Settings.
 		Address: "http://127.0.0.1:8080",
