@@ -1,25 +1,31 @@
 package deleter
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 
+	"github.com/go-resty/resty"
+
 	"github.com/giantswarm/microclient"
 	"github.com/giantswarm/microerror"
-	"github.com/go-resty/resty"
-	"golang.org/x/net/context"
+	"github.com/giantswarm/micrologger"
 )
 
 const (
+	// Endpoint is the API endpoint of the service this client action interacts
+	// with.
 	Endpoint = "/v1/clusters/%s/"
+	// Name is the service name being implemented. This can be used for e.g.
+	// logging.
+	Name = "cluster/deleter"
 )
 
 // Config represents the configuration used to create a deleter service.
 type Config struct {
-	// Dependencies.
+	Logger     micrologger.Logger
 	RestClient *resty.Client
 
-	// Settings.
 	URL *url.URL
 }
 
@@ -27,47 +33,55 @@ type Config struct {
 // service by best effort.
 func DefaultConfig() Config {
 	return Config{
-		// Dependencies.
-		RestClient: resty.New(),
+		Logger:     nil,
+		RestClient: nil,
 
-		// Settings.
 		URL: nil,
 	}
 }
 
 // New creates a new configured deleter service.
 func New(config Config) (*Service, error) {
-	// Dependencies.
+	if config.Logger == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
+	}
 	if config.RestClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "rest client must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "config.RestClient must not be empty")
 	}
 
-	// Settings.
 	if config.URL == nil {
-		return nil, microerror.Maskf(invalidConfigError, "URL must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "config.URL must not be empty")
 	}
 
 	newService := &Service{
-		Config: config,
+		logger:     config.Logger,
+		restClient: config.RestClient,
+
+		url: config.URL,
 	}
 
 	return newService, nil
 }
 
 type Service struct {
-	Config
+	logger     micrologger.Logger
+	restClient *resty.Client
+
+	url *url.URL
 }
 
 func (s *Service) Delete(ctx context.Context, request Request) (*Response, error) {
-	u, err := s.URL.Parse(fmt.Sprintf(Endpoint, request.Cluster.ID))
+	u, err := s.url.Parse(fmt.Sprintf(Endpoint, request.Cluster.ID))
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	r, err := microclient.Do(ctx, s.RestClient.R().SetBody(request).SetResult(DefaultResponse()).Delete, u.String())
+	s.logger.Log("debug", fmt.Sprintf("sending DELETE request to %s", u.String()), "service", Name)
+	r, err := microclient.Do(ctx, s.restClient.R().SetBody(request).SetResult(DefaultResponse()).Delete, u.String())
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+	s.logger.Log("debug", fmt.Sprintf("received status code %d", r.StatusCode()), "service", Name)
 
 	if r.StatusCode() != 202 {
 		return nil, microerror.Maskf(executionFailedError, string(r.Body()))
