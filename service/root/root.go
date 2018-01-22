@@ -1,74 +1,87 @@
 package root
 
 import (
+	"context"
+	"fmt"
 	"net/url"
+
+	"github.com/go-resty/resty"
 
 	"github.com/giantswarm/microclient"
 	"github.com/giantswarm/microerror"
-	"github.com/go-resty/resty"
-	"golang.org/x/net/context"
+	"github.com/giantswarm/micrologger"
 )
 
 const (
+	// Endpoint is the API endpoint of the service this client action interacts
+	// with.
 	Endpoint = "/"
+	// Name is the service name being implemented. This can be used for e.g.
+	// logging.
+	Name = "cluster/root"
 )
 
 // Config represents the configuration used to create a root service.
 type Config struct {
-	// Dependencies.
+	Logger     micrologger.Logger
 	RestClient *resty.Client
 
-	// Settings.
 	URL *url.URL
 }
 
 // DefaultConfig provides a default configuration to create a new root service
 // by best effort.
 func DefaultConfig() Config {
-	newConfig := Config{
-		// Dependencies.
-		RestClient: resty.New(),
+	return Config{
+		Logger:     nil,
+		RestClient: nil,
 
-		// Settings.
 		URL: nil,
 	}
-
-	return newConfig
 }
 
 // New creates a new configured root service.
 func New(config Config) (*Service, error) {
+	if config.Logger == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
+	}
+	if config.RestClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.RestClient must not be empty")
+	}
+
+	if config.URL == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.URL must not be empty")
+	}
+
 	newService := &Service{
-		Config: config,
-	}
+		logger:     config.Logger,
+		restClient: config.RestClient,
 
-	// Dependencies.
-	if newService.RestClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "rest client must not be empty")
-	}
-
-	// Settings.
-	if newService.URL == nil {
-		return nil, microerror.Maskf(invalidConfigError, "URL must not be empty")
+		url: config.URL,
 	}
 
 	return newService, nil
 }
 
 type Service struct {
-	Config
+	logger     micrologger.Logger
+	restClient *resty.Client
+
+	url *url.URL
 }
 
 func (s *Service) Get(ctx context.Context) (*Response, error) {
-	u, err := s.URL.Parse(Endpoint)
+	u, err := s.url.Parse(Endpoint)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	r, err := microclient.Do(ctx, s.RestClient.R().SetResult(&Response{}).Get, u.String())
+	s.logger.Log("debug", fmt.Sprintf("sending GET request to %s", u.String()), "service", Name)
+	r, err := microclient.Do(ctx, s.restClient.R().SetResult(&Response{}).Get, u.String())
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+	s.logger.Log("debug", fmt.Sprintf("received status code %d", r.StatusCode()), "service", Name)
 
 	response := r.Result().(*Response)
 

@@ -5,8 +5,10 @@ package kubernetesdclient
 import (
 	"net/url"
 
-	"github.com/giantswarm/microerror"
 	"github.com/go-resty/resty"
+
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/kubernetesdclient/service/creator"
 	"github.com/giantswarm/kubernetesdclient/service/deleter"
@@ -16,25 +18,21 @@ import (
 
 // Config represents the configuration used to create a new client object.
 type Config struct {
-	// Dependencies.
+	Logger     micrologger.Logger
 	RestClient *resty.Client
 
-	// Settings.
 	Address string
 }
 
 // DefaultConfig provides a default configuration to create a new client object
 // by best effort.
 func DefaultConfig() Config {
-	newConfig := Config{
-		// Dependencies.
-		RestClient: resty.New(),
+	return Config{
+		Logger:     nil,
+		RestClient: nil,
 
-		// Settings.
-		Address: "http://127.0.0.1:8080",
+		Address: "",
 	}
-
-	return newConfig
 }
 
 type Client struct {
@@ -46,14 +44,8 @@ type Client struct {
 
 // New creates a new configured client object.
 func New(config Config) (*Client, error) {
-	// Dependencies.
-	if config.RestClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "rest client must not be empty")
-	}
-
-	// Settings.
 	if config.Address == "" {
-		return nil, microerror.Maskf(invalidConfigError, "address must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "config.Address must not be empty")
 	}
 
 	u, err := url.Parse(config.Address)
@@ -61,43 +53,67 @@ func New(config Config) (*Client, error) {
 		return nil, microerror.Mask(err)
 	}
 
-	creatorConfig := creator.DefaultConfig()
-	creatorConfig.RestClient = config.RestClient
-	creatorConfig.URL = u
-	newCreatorService, err := creator.New(creatorConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
+	var creatorService *creator.Service
+	{
+		creatorConfig := creator.DefaultConfig()
+
+		creatorConfig.Logger = config.Logger
+		creatorConfig.RestClient = config.RestClient
+		creatorConfig.URL = u
+
+		creatorService, err = creator.New(creatorConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
-	deleterConfig := deleter.DefaultConfig()
-	deleterConfig.RestClient = config.RestClient
-	deleterConfig.URL = u
-	newDeleterService, err := deleter.New(deleterConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
+	var deleterService *deleter.Service
+	{
+		deleterConfig := deleter.DefaultConfig()
+
+		deleterConfig.Logger = config.Logger
+		deleterConfig.RestClient = config.RestClient
+		deleterConfig.URL = u
+
+		deleterService, err = deleter.New(deleterConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
-	rootConfig := root.DefaultConfig()
-	rootConfig.RestClient = config.RestClient
-	rootConfig.URL = u
-	newRootService, err := root.New(rootConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
+	var rootService *root.Service
+	{
+		rootConfig := root.DefaultConfig()
+
+		rootConfig.Logger = config.Logger
+		rootConfig.RestClient = config.RestClient
+		rootConfig.URL = u
+
+		rootService, err = root.New(rootConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
-	updaterConfig := updater.DefaultConfig()
-	updaterConfig.RestClient = config.RestClient
-	updaterConfig.URL = u
-	newUpdaterService, err := updater.New(updaterConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
+	var updaterService *updater.Service
+	{
+		updaterConfig := updater.DefaultConfig()
+
+		updaterConfig.Logger = config.Logger
+		updaterConfig.RestClient = config.RestClient
+		updaterConfig.URL = u
+
+		updaterService, err = updater.New(updaterConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	newClient := &Client{
-		Creator: newCreatorService,
-		Deleter: newDeleterService,
-		Root:    newRootService,
-		Updater: newUpdaterService,
+		Creator: creatorService,
+		Deleter: deleterService,
+		Root:    rootService,
+		Updater: updaterService,
 	}
 
 	return newClient, nil
