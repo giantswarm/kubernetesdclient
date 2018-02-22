@@ -2,11 +2,13 @@ package request
 
 import (
 	"github.com/giantswarm/kubernetesdclient/service/creator/request/aws"
+	"github.com/giantswarm/kubernetesdclient/service/creator/request/azure"
 )
 
 // Worker configures the Kubernetes worker nodes.
 type Worker struct {
 	AWS     aws.Worker        `json:"aws"`
+	Azure   azure.Worker      `json:"azure"`
 	CPU     CPU               `json:"cpu"`
 	ID      string            `json:"id"`
 	Labels  map[string]string `json:"labels"`
@@ -18,6 +20,7 @@ type Worker struct {
 func DefaultWorker() Worker {
 	return Worker{
 		AWS:     aws.DefaultWorker(),
+		Azure:   azure.DefaultWorker(),
 		CPU:     DefaultCPU(),
 		ID:      "",
 		Labels:  map[string]string{},
