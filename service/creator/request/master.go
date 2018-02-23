@@ -19,7 +19,6 @@ type Master struct {
 func DefaultMaster() Master {
 	return Master{
 		AWS:     aws.DefaultMaster(),
-		Azure:   azure.DefaultMaster(),
 		CPU:     DefaultCPU(),
 		ID:      "",
 		Memory:  DefaultMemory(),

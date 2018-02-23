@@ -20,7 +20,6 @@ type Worker struct {
 func DefaultWorker() Worker {
 	return Worker{
 		AWS:     aws.DefaultWorker(),
-		Azure:   azure.DefaultWorker(),
 		CPU:     DefaultCPU(),
 		ID:      "",
 		Labels:  map[string]string{},
