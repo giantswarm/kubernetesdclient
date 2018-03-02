@@ -1,7 +1,7 @@
 package searcher
 
 import (
-	"github.com/giantswarm/kubernetesd/server/endpoint/searcher/response"
+	"github.com/giantswarm/kubernetesdclient/service/searcher/response"
 )
 
 // Response is the return value of this endpoint.
