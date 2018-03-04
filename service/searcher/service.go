@@ -30,67 +30,49 @@ type Config struct {
 	URL *url.URL
 }
 
-// DefaultConfig provides a default configuration to create a new creator
-// service by best effort.
-func DefaultConfig() Config {
-	var err error
-
-	var newLogger micrologger.Logger
-	{
-		loggerConfig := micrologger.DefaultConfig()
-		newLogger, err = micrologger.New(loggerConfig)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	newConfig := Config{
-		// Dependencies.
-		Logger:     newLogger,
-		RestClient: resty.New(),
-
-		// Settings.
-		URL: nil,
-	}
-
-	return newConfig
+type Service struct {
+	logger     micrologger.Logger
+	restClient *resty.Client
+	url        *url.URL
 }
 
 // New creates a new configured updater service.
 func New(config Config) (*Service, error) {
 	// Dependencies.
+	if config.Logger == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
+	}
+
 	if config.RestClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "rest client must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.RestClient must not be empty", config)
 	}
 
 	// Settings.
 	if config.URL == nil {
-		return nil, microerror.Maskf(invalidConfigError, "URL must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.URL must not be empty", config)
 	}
 
 	newService := &Service{
-		Config: config,
+		logger:     config.Logger,
+		restClient: config.RestClient,
+		url:        config.URL,
 	}
 
 	return newService, nil
 }
 
-type Service struct {
-	Config
-}
-
 func (s *Service) Search(ctx context.Context, request Request) (*Response, error) {
-	u, err := s.URL.Parse(fmt.Sprintf(Endpoint, request.Cluster.ID))
+	u, err := s.url.Parse(fmt.Sprintf(Endpoint, request.Cluster.ID))
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	s.Logger.Log("debug", fmt.Sprintf("sending GET request to %s", u.String()), "service", Name)
-	r, err := s.RestClient.R().SetBody(request).SetResult(DefaultResponse()).Get(u.String())
+	s.logger.Log("debug", fmt.Sprintf("sending GET request to %s", u.String()), "service", Name)
+	r, err := s.restClient.R().SetBody(request).SetResult(Response{}).Get(u.String())
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	s.Logger.Log("debug", fmt.Sprintf("received status code %d", r.StatusCode()), "service", Name)
+	s.logger.Log("debug", fmt.Sprintf("received status code %d", r.StatusCode()), "service", Name)
 
 	if r.StatusCode() == http.StatusNotFound {
 		return nil, microerror.Mask(notFoundError)

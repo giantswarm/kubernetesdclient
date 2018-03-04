@@ -113,12 +113,13 @@ func New(config Config) (*Client, error) {
 
 	var searcherService *searcher.Service
 	{
-		searcherConfig := searcher.DefaultConfig()
+		c := searcher.Config{
+			Logger:     config.Logger,
+			RestClient: config.RestClient,
+			URL:        u,
+		}
 
-		searcherConfig.RestClient = config.RestClient
-		searcherConfig.URL = u
-
-		searcherService, err = searcher.New(searcherConfig)
+		searcherService, err = searcher.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
