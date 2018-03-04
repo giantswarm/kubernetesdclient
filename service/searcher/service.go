@@ -14,7 +14,7 @@ import (
 const (
 	// Endpoint is the API endpoint of the service this client action interacts
 	// with.
-	Endpoint = "/v1/clusters/%s/"
+	Endpoint = "/v1/clusters/%s/ingress-ports/"
 	// Name is the service name being implemented. This can be used for e.g.
 	// logging.
 	Name = "cluster/searcher"
