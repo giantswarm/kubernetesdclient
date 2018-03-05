@@ -17,7 +17,7 @@ const (
 	Endpoint = "/v1/clusters/%s/ingress-ports/"
 	// Name is the service name being implemented. This can be used for e.g.
 	// logging.
-	Name = "cluster/searcher"
+	Name = "cluster/ingress-ports/searcher"
 )
 
 // Config represents the configuration used to create a creator service.
@@ -67,12 +67,14 @@ func (s *Service) Search(ctx context.Context, request Request) (*Response, error
 		return nil, microerror.Mask(err)
 	}
 
-	s.logger.Log("debug", fmt.Sprintf("sending GET request to %s", u.String()), "service", Name)
+	s.logger.Log("function", "Search", "level", "debug", "message", fmt.Sprintf("sending GET request to %s", u.String()), "service", Name)
+
 	r, err := s.restClient.R().SetBody(request).SetResult(Response{}).Get(u.String())
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	s.logger.Log("debug", fmt.Sprintf("received status code %d", r.StatusCode()), "service", Name)
+
+	s.logger.Log("function", "Search", "level", "debug", "message", fmt.Sprintf("received status code %d", r.StatusCode()), "service", Name)
 
 	if r.StatusCode() == http.StatusNotFound {
 		return nil, microerror.Mask(notFoundError)
