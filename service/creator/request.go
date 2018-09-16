@@ -13,7 +13,6 @@ type Request struct {
 	APIEndpoint    string                 `json:"api_endpoint"`
 	CreateDate     time.Time              `json:"create_date"`
 	ID             string                 `json:"id"`
-	Masters        []request.Master       `json:"masters,omitempty"`
 	Name           string                 `json:"name,omitempty"`
 	Owner          string                 `json:"owner,omitempty"`
 	VersionBundles []versionbundle.Bundle `json:"version_bundles,omitempty"`
@@ -27,7 +26,6 @@ func DefaultRequest() Request {
 		APIEndpoint:    "",
 		CreateDate:     time.Time{},
 		ID:             "",
-		Masters:        []request.Master{},
 		Name:           "",
 		Owner:          "",
 		VersionBundles: []versionbundle.Bundle{},

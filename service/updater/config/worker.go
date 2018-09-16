@@ -13,7 +13,7 @@ type Worker struct {
 	ID      string            `json:"id"`
 	Labels  map[string]string `json:"labels"`
 	Memory  Memory            `json:"memory"`
-	Storage Storage           `json:"storage"`
+	Volumes Volumes           `json:"volumes"`
 }
 
 // DefaultWorker provides a default worker configuration by best effort.
@@ -24,6 +24,6 @@ func DefaultWorker() Worker {
 		ID:      "",
 		Labels:  map[string]string{},
 		Memory:  DefaultMemory(),
-		Storage: DefaultStorage(),
+		Volumes: DefaultVolumes(),
 	}
 }
