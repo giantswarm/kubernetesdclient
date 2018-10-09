@@ -25,6 +25,7 @@
 #   unused-packages = true
 
 
+
 [[constraint]]
   branch = "master"
   name = "github.com/giantswarm/microclient"
@@ -44,6 +45,8 @@
 [[constraint]]
   name = "github.com/go-resty/resty"
   version = "1.0.0"
+
+
 
 [prune]
   go-tests = true
