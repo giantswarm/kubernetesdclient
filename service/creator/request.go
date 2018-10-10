@@ -17,7 +17,6 @@ type Request struct {
 	Name           string                 `json:"name,omitempty"`
 	Owner          string                 `json:"owner,omitempty"`
 	VersionBundles []versionbundle.Bundle `json:"version_bundles,omitempty"`
-	Vault          request.Vault          `json:"vault,omitempty"`
 	Workers        []request.Worker       `json:"workers,omitempty"`
 }
 
@@ -31,7 +30,6 @@ func DefaultRequest() Request {
 		Name:           "",
 		Owner:          "",
 		VersionBundles: []versionbundle.Bundle{},
-		Vault:          request.DefaultVault(),
 		Workers:        []request.Worker{},
 	}
 }
