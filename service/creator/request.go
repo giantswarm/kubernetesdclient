@@ -17,6 +17,7 @@ type Request struct {
 	Masters           []request.Master       `json:"masters,omitempty"`
 	Name              string                 `json:"name,omitempty"`
 	Owner             string                 `json:"owner,omitempty"`
+	Region            string                 `json:"region,omitempty"`
 	Scaling           request.Scaling        `json:"scaling,omitempty"`
 	VersionBundles    []versionbundle.Bundle `json:"version_bundles,omitempty"`
 	Workers           []request.Worker       `json:"workers,omitempty"`
@@ -32,6 +33,7 @@ func DefaultRequest() Request {
 		Masters:           []request.Master{},
 		Name:              "",
 		Owner:             "",
+		Region:            "",
 		Scaling:           request.Scaling{},
 		VersionBundles:    []versionbundle.Bundle{},
 		Workers:           []request.Worker{},
