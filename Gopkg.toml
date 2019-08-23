@@ -43,8 +43,8 @@
   name = "github.com/giantswarm/versionbundle"
 
 [[constraint]]
-  name = "github.com/go-resty/resty"
-  version = "1.0.0"
+  name = "gopkg.in/resty.v1"
+  version = "=v1.12.0"
 
 
 

@@ -7,8 +7,8 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/go-resty/resty"
 	"golang.org/x/net/context"
+	"gopkg.in/resty.v1"
 )
 
 const (

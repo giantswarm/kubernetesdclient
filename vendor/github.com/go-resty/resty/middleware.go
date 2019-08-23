@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2018 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
+// Copyright (c) 2015-2019 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
 // resty source code and usage is governed by a MIT style
 // license that can be found in the LICENSE file.
 
@@ -20,20 +20,22 @@ import (
 	"time"
 )
 
-//‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+const debugRequestLogKey = "__restyDebugRequestLog"
+
+//‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 // Request Middleware(s)
-//___________________________________
+//_______________________________________________________________________
 
 func parseRequestURL(c *Client, r *Request) error {
 	// GitHub #103 Path Params
 	if len(r.pathParams) > 0 {
 		for p, v := range r.pathParams {
-			r.URL = strings.Replace(r.URL, "{"+p+"}", v, -1)
+			r.URL = strings.Replace(r.URL, "{"+p+"}", url.PathEscape(v), -1)
 		}
 	}
 	if len(c.pathParams) > 0 {
 		for p, v := range c.pathParams {
-			r.URL = strings.Replace(r.URL, "{"+p+"}", v, -1)
+			r.URL = strings.Replace(r.URL, "{"+p+"}", url.PathEscape(v), -1)
 		}
 	}
 
@@ -104,7 +106,7 @@ func parseRequestHeader(c *Client, r *Request) error {
 	}
 
 	if IsStringEmpty(hdr.Get(hdrUserAgentKey)) {
-		hdr.Set(hdrUserAgentKey, fmt.Sprintf(hdrUserAgentValue, Version))
+		hdr.Set(hdrUserAgentKey, hdrUserAgentValue)
 	}
 
 	ct := hdr.Get(hdrContentTypeKey)
@@ -188,7 +190,15 @@ func createHTTPRequest(c *Client, r *Request) (err error) {
 	}
 
 	// Use context if it was specified
-	r.addContextIfAvailable()
+	if r.ctx != nil {
+		r.RawRequest = r.RawRequest.WithContext(r.ctx)
+	}
+
+	// Enable trace
+	if c.trace || r.trace {
+		r.clientTrace = &clientTrace{}
+		r.RawRequest = r.RawRequest.WithContext(r.clientTrace.createContext())
+	}
 
 	return
 }
@@ -206,7 +216,7 @@ func addCredentials(c *Client, r *Request) error {
 
 	if !c.DisableWarn {
 		if isBasicAuth && !strings.HasPrefix(r.URL, "https") {
-			c.Log.Println("WARNING - Using Basic Auth in HTTP mode is not secure.")
+			c.log.Warnf("Using Basic Auth in HTTP mode is not secure, use HTTPS")
 		}
 	}
 
@@ -223,47 +233,64 @@ func addCredentials(c *Client, r *Request) error {
 func requestLogger(c *Client, r *Request) error {
 	if c.Debug {
 		rr := r.RawRequest
-		reqLog := "\n---------------------- REQUEST LOG -----------------------\n" +
+		rl := &RequestLog{Header: copyHeaders(rr.Header), Body: r.fmtBodyString()}
+		if c.requestLog != nil {
+			if err := c.requestLog(rl); err != nil {
+				return err
+			}
+		}
+
+		reqLog := "\n==============================================================================\n" +
 			fmt.Sprintf("%s  %s  %s\n", r.Method, rr.URL.RequestURI(), rr.Proto) +
 			fmt.Sprintf("HOST   : %s\n", rr.URL.Host) +
 			fmt.Sprintf("HEADERS:\n") +
-			composeHeaders(rr.Header) + "\n" +
-			fmt.Sprintf("BODY   :\n%v\n", r.fmtBodyString()) +
-			"----------------------------------------------------------\n"
+			composeHeaders(rl.Header) + "\n" +
+			fmt.Sprintf("BODY   :\n%v\n", rl.Body) +
+			"------------------------------------------------------------------------------\n"
 
-		c.Log.Print(reqLog)
+		r.initValuesMap()
+		r.values[debugRequestLogKey] = reqLog
 	}
 
 	return nil
 }
 
-//‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+//‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 // Response Middleware(s)
-//___________________________________
+//_______________________________________________________________________
 
 func responseLogger(c *Client, res *Response) error {
 	if c.Debug {
-		resLog := "\n---------------------- RESPONSE LOG -----------------------\n" +
-			fmt.Sprintf("STATUS 		: %s\n", res.Status()) +
+		rl := &ResponseLog{Header: copyHeaders(res.Header()), Body: res.fmtBodyString(c.debugBodySizeLimit)}
+		if c.responseLog != nil {
+			if err := c.responseLog(rl); err != nil {
+				return err
+			}
+		}
+
+		debugLog := res.Request.values[debugRequestLogKey].(string)
+		debugLog += fmt.Sprintf("STATUS 		: %s\n", res.Status()) +
 			fmt.Sprintf("RECEIVED AT	: %v\n", res.ReceivedAt().Format(time.RFC3339Nano)) +
 			fmt.Sprintf("RESPONSE TIME	: %v\n", res.Time()) +
 			"HEADERS:\n" +
-			composeHeaders(res.Header()) + "\n"
-
+			composeHeaders(rl.Header) + "\n"
 		if res.Request.isSaveResponse {
-			resLog += fmt.Sprintf("BODY   :\n***** RESPONSE WRITTEN INTO FILE *****\n")
+			debugLog += fmt.Sprintf("BODY   :\n***** RESPONSE WRITTEN INTO FILE *****\n")
 		} else {
-			resLog += fmt.Sprintf("BODY   :\n%v\n", res.fmtBodyString(c.debugBodySizeLimit))
+			debugLog += fmt.Sprintf("BODY   :\n%v\n", rl.Body)
 		}
-		resLog += "----------------------------------------------------------\n"
+		debugLog += "==============================================================================\n"
 
-		c.Log.Print(resLog)
+		c.log.Debugf(debugLog)
 	}
 
 	return nil
 }
 
 func parseResponseBody(c *Client, res *Response) (err error) {
+	if res.StatusCode() == http.StatusNoContent {
+		return
+	}
 	// Handles only JSON or XML content type
 	ct := firstNonEmpty(res.Header().Get(hdrContentTypeKey), res.Request.fallbackContentType)
 	if IsJSONType(ct) || IsXMLType(ct) {

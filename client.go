@@ -5,10 +5,9 @@ package kubernetesdclient
 import (
 	"net/url"
 
-	"github.com/go-resty/resty"
-
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"gopkg.in/resty.v1"
 
 	"github.com/giantswarm/kubernetesdclient/service/creator"
 	"github.com/giantswarm/kubernetesdclient/service/deleter"
