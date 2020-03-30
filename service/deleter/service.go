@@ -76,7 +76,7 @@ func (s *Service) Delete(ctx context.Context, request Request) (*Response, error
 		return nil, microerror.Mask(err)
 	}
 
-	s.logger.Log("debug", fmt.Sprintf("sending DELETE request to %s", u.String()), "service", Name)
+	s.logger.Log("debug", fmt.Sprintf("sending deletion request to %s", u.String()), "service", Name)
 	r, err := microclient.Do(ctx, s.restClient.R().SetBody(request).SetResult(DefaultResponse()).Delete, u.String())
 	if err != nil {
 		return nil, microerror.Mask(err)
