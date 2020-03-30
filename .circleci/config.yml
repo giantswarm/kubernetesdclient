@@ -1,14 +1,13 @@
 version: 2.1
 orbs:
-  architect: giantswarm/architect@0.4.5
+  architect: giantswarm/architect@0.8.4
 
 workflows:
-  go-build:
+  test:
     jobs:
-      - architect/go-build:
-          name: go-build-opsctl
-          binary: opsctl
+      - architect/go-test:
+          name: go-test
           filters:
-            # Needed to trigger job also on git tag.
+            # Trigger job also on git tag.
             tags:
               only: /^v.*/
